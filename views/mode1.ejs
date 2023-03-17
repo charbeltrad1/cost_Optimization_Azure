@@ -1,0 +1,73 @@
+<%- include("header") -%>
+
+<form id="myForm">
+    <label for="vmSize">VM Size:</label>
+    <input type="text" name="vmSize" id="vmSize" placeholder="Standard_E2s"><br>
+  
+    <label for="location">Location:</label>
+    <input type="text" name="location" id="location" placeholder="westeurope"><br>
+  
+    <label for="low">Low:</label>
+    <input type="checkbox" name="low" id="low"><br>
+  
+    <label for="windows">Windows:</label>
+    <input type="checkbox" name="windows" id="windows"><br>
+  
+    <label for="currencycode">Currency Code:</label>
+    <input type="text" name="currencycode" id="currencycode" placeholder="EUR"><br>
+  
+    <label for="clientVM">Client VM:</label>
+    <input type="text" name="clientVM" id="clientVM" placeholder="Standard_E2s_v3"><br>
+  
+    <button type="submit">Submit</button>
+  </form>
+  
+  <script>
+    const myForm = document.getElementById("myForm");
+    myForm.addEventListener("submit", function(event) {
+      event.preventDefault();
+  
+      const formData = {
+        vmSize: document.getElementById("vmSize").value,
+        location: document.getElementById("location").value,
+        low: document.getElementById("low").checked,
+        windows: document.getElementById("windows").checked,
+        currencycode: document.getElementById("currencycode").value,
+        clientVM: document.getElementById("clientVM").value
+      };
+      console.log(formData);
+      fetch("/mode1", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(response => {
+        return response.json();
+    }).then(data=>{
+        console.log(data);
+        const existingElement = document.getElementById("myForm");
+        const division = document.createElement("div");
+        division.className="box";
+        division.id="result"
+        const newList = document.createElement("ul");
+        division.appendChild(newList);
+
+        data.forEach((string) => {
+            const newListItem = document.createElement("li");
+            newListItem.textContent = string;
+            newList.appendChild(newListItem);
+        });
+
+        existingElement.insertAdjacentElement("afterend", division);
+
+    })
+      .catch(error => {
+        console.error("Error submitting form", error);
+        // handle the error if needed
+      });
+    });
+  </script>
+  
+<%- include("footer") -%>
