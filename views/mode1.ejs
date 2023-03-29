@@ -1,34 +1,104 @@
 <%- include("header") -%>
 
 <form id="myForm">
-    <label for="vmSize">VM Size:</label>
-    <input type="text" name="vmSize" id="vmSize" placeholder="Standard_E2s"><br>
   
+    <label for="clientVM">VM name (arm Sku name):</label>
+    <input type="text" name="clientVM" id="clientVM" placeholder="Standard_E2s_v3"><br>
+
     <label for="location">Location:</label>
-    <input type="text" name="location" id="location" placeholder="westeurope"><br>
-  
-    <label for="low">Low:</label>
+    <select id="location">
+      <option value="australiaeast">Australia East</option>
+      <option value="australiasoutheast">Australia Southeast</option>
+      <option value="brazilsouth">Brazil South</option>
+      <option value="canadacentral">Canada Central</option>
+      <option value="canadaeast">Canada East</option>
+      <option value="centralindia">Central India</option>
+      <option value="centralus">Central US</option>
+      <option value="eastasia">East Asia</option>
+      <option value="eastus">East US</option>
+      <option value="eastus2">East US 2</option>
+      <option value="francecentral">France Central</option>
+      <option value="francesouth">France South</option>
+      <option value="germanynorth">Germany North</option>
+      <option value="germanywestcentral">Germany West Central</option>
+      <option value="japaneast">Japan East</option>
+      <option value="japanwest">Japan West</option>
+      <option value="koreacentral">Korea Central</option>
+      <option value="koreasouth">Korea South</option>
+      <option value="northcentralus">North Central US</option>
+      <option value="northeurope">North Europe</option>
+      <option value="norwayeast">Norway East</option>
+      <option value="norwaywest">Norway West</option>
+      <option value="southafricanorth">South Africa North</option>
+      <option value="southafricawest">South Africa West</option>
+      <option value="southcentralus">South Central US</option>
+      <option value="southeastasia">Southeast Asia</option>
+      <option value="southindia">South India</option>
+      <option value="switzerlandnorth">Switzerland North</option>
+      <option value="switzerlandwest">Switzerland West</option>
+      <option value="uaecentral">UAE Central</option>
+      <option value="uaenorth">UAE North</option>
+      <option value="uksouth">UK South</option>
+      <option value="ukwest">UK West</option>
+      <option value="westcentralus">West Central US</option>
+      <option value="westeurope" selected>West Europe</option>
+      <option value="westindia">West India</option>
+      <option value="westus">West US</option>
+      <option value="westus2">West US 2</option>
+    </select>
+
+    <label for="low">Low Priority:</label>
     <input type="checkbox" name="low" id="low"><br>
   
-    <label for="windows">Windows:</label>
+    <label for="windows">Windows VM:</label>
     <input type="checkbox" name="windows" id="windows"><br>
   
     <label for="currencycode">Currency Code:</label>
-    <input type="text" name="currencycode" id="currencycode" placeholder="EUR"><br>
+    <select id="currencycode">
+      <option value="USD">US dollar</option>
+      <option value="AUD">Australian dollar</option>
+      <option value="BRL">Brazilian real</option>
+      <option value="CAD">Canadian dollar</option>
+      <option value="CHF">Swiss franc</option>
+      <option value="CNY">Chinese yuan</option>
+      <option value="DKK">Danish krone</option>
+      <option value="EUR" selected>Euro</option>
+      <option value="GBP">British pound</option>
+      <option value="INR">Indian rupee</option>
+      <option value="JPY">Japanese yen</option>
+      <option value="KRW">Korean won</option>
+      <option value="NOK">Norwegian krone</option>
+      <option value="NZD">New Zealand dollar</option>
+      <option value="RUB">Russian ruble</option>
+      <option value="SEK">Swedish krona</option>
+      <option value="TWD">Taiwan dollar</option>
+    </select>
+    
+    <br>
   
-    <label for="clientVM">Client VM:</label>
-    <input type="text" name="clientVM" id="clientVM" placeholder="Standard_E2s_v3"><br>
-  
-    <button type="submit">Submit</button>
+    <button type="submit" id="submitbutton">Submit</button>
+    <br>
+    <div id="loading-container">
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    </div>
   </form>
-  
+
   <script>
+    const loadingContainer = document.getElementById("loading-container");
+    loadingContainer.style.display = "none";
+
     const myForm = document.getElementById("myForm");
-    myForm.addEventListener("submit", function(event) {
+    myForm.addEventListener("submit", async function(event) {
+      loadingContainer.style.display = "flex";
+
+      if (document.getElementById("result")) {
+        document.getElementById("result").remove();
+      }
       event.preventDefault();
-  
+
       const formData = {
-        vmSize: document.getElementById("vmSize").value,
+        vmSize: document.getElementById("clientVM").value.split("_").slice(0, 2).join("_"),
         location: document.getElementById("location").value,
         low: document.getElementById("low").checked,
         windows: document.getElementById("windows").checked,
@@ -36,7 +106,10 @@
         clientVM: document.getElementById("clientVM").value
       };
       console.log(formData);
-      fetch("/mode1", {
+      if(formData.vmSize==="" || formData.location==="" || formData.currencycode==="" || formData.clientVM ===""){
+        alert("Please fill all the values to continue!");
+      }else{
+        fetch("/mode1", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -46,7 +119,7 @@
       .then(response => {
         return response.json();
     }).then(data=>{
-        console.log(data);
+        loadingContainer.style.display = "none";
         const existingElement = document.getElementById("myForm");
         const division = document.createElement("div");
         division.className="box";
@@ -61,12 +134,12 @@
         });
 
         existingElement.insertAdjacentElement("afterend", division);
-
     })
       .catch(error => {
         console.error("Error submitting form", error);
         // handle the error if needed
       });
+      }
     });
   </script>
   

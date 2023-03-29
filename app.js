@@ -54,15 +54,19 @@ app.post("/mode1", function(req, res) {
         getAzurePrices(apiUrl,vmSize,location,low,windows,currencycode,clientVM)
             .then(async result => {
                 let minimum = ExistingVM[clientVM].price;
+                let target =clientVM;
                 for (let key in result) {
-                    if (result[key].price < minimum) {
-                        minimum = result[key].price
-                    }
                     if (result[key].price <= ExistingVM[clientVM].price && result[key].vcpu >= ExistingVM[clientVM].vcpu && result[key].memory >= ExistingVM[clientVM].memory) {
                         await decisions.push(`You can switch to ${key} at ${currencycode} ${result[key].price} with VCPUs = ${result[key].vcpu} and memory = ${result[key].memory} GiB\n`)
-                    }
+                        if (result[key].price < minimum) {
+                          minimum = result[key].price;
+                          target = key;
+                      }
+                      }
                 }
-                await decisions.push(`You are cost optimizing ${ExistingVM[clientVM].price - minimum} ${currencycode} per 1 VM by Sku refactoring`);
+                if(minimum != ExistingVM[clientVM].price){
+                  await decisions.push(`You can save up to ${Math.ceil(100*(ExistingVM[clientVM].price-minimum)/ExistingVM[clientVM].price)}% per 1 VM by Sku refactoring to ${target}`);
+                }
                 console.log(decisions);
                 res.send(decisions);
             })
@@ -141,3 +145,4 @@ app.listen(3000, function() {
   console.log("Server started on port 3000");
 });
 
+s
