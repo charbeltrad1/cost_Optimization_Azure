@@ -2,8 +2,12 @@
 
 <form id="myForm">
   
-    <label for="clientVM">VM name (arm Sku name):</label>
-    <input type="text" name="clientVM" id="clientVM" placeholder="Standard_E2s_v3"><br>
+  <label for="clientVM">VM name (arm Sku name):</label>
+  <select id="clientVM">
+    <% vmsNames.forEach(function(element){ %>
+      <option value="<%= element %>"><%=  element  %></option>
+      <% }); %>
+  </select>
 
     <label for="location">Location:</label>
     <select id="location">
@@ -83,7 +87,7 @@
       <p>Loading...</p>
     </div>
   </form>
-
+  
   <script>
     const loadingContainer = document.getElementById("loading-container");
     loadingContainer.style.display = "none";
@@ -141,6 +145,20 @@
       });
       }
     });
+      // Get the search bar and dropdown list
+      const searchBar = document.getElementById("searchBar");
+      const dropdown = document.getElementById("clientVM");
+      // Get the list of options as an array
+      const options = Array.from(dropdown.options).map(option => option.textContent);
+      
+      // Add an event listener to the search bar that filters the options
+      searchBar.addEventListener("input", () => {
+        const searchValue = searchBar.value.toLowerCase();
+        const filteredOptions = options.filter(option => option.toLowerCase().includes(searchValue));
+        // Update the dropdown list with the filtered options
+        dropdown.innerHTML = "<option value=''>-- Select a VM --</option>" + 
+                              filteredOptions.map(option => `<option value='${option}'>${option}</option>`).join("");
+      });
   </script>
   
 <%- include("footer") -%>
