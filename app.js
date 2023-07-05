@@ -70,7 +70,7 @@ app.post("/mode1", async function(req, res) {
   console.log(apiUrl);
 
   let clientVMindex;
-  let decisions = [], savingsPlan = [];
+  let currentVM=[], decisions = [], savingsPlan = [];
 
   const response = await fetch(apiUrl);
   const data = await response.json();
@@ -83,27 +83,44 @@ app.post("/mode1", async function(req, res) {
       if (typeof properties != 'undefined') {
         dataItems[index].vcpu = Number(properties.numberOfCores);
         dataItems[index].memory = Number(properties.memoryInMB);
+        dataItems[index].iops = Number(properties.combinedIOPS);
+
       }else{
         dataItems[index].vcpu = "No data";
         dataItems[index].memory = "No data";
+        dataItems[index].iops = "No data";
+
       }
       if(item.armSkuName === clientVM){
         clientVMindex = index;
       }
     });
+    currentVM.push({
+      name: dataItems[clientVMindex].armSkuName,
+      price: dataItems[clientVMindex].unitPrice,
+      vcpu: dataItems[clientVMindex].vcpu,
+      memory: dataItems[clientVMindex].memory,
+      iops: dataItems[clientVMindex].iops,
+      currencycode: currencycode,
+      saving: 0
+    });
+
     dataItems.forEach((item,index)=>{
       
       let condition1 = item.unitPrice <= dataItems[clientVMindex].unitPrice;
-      let condition2 = item.vcpu != "No data" && item.memory != "No data";
-      let condition3 = item.vcpu >= dataItems[clientVMindex].vcpu && item.memory >= dataItems[clientVMindex].memory;
-      if (condition1 && condition2 && condition3) {
+      let condition2 = item.vcpu != "No data" && item.memory != "No data" && item.iops != "No data";
+      let condition3 = item.vcpu >= dataItems[clientVMindex].vcpu && item.memory >= dataItems[clientVMindex].memory && item.iops >= dataItems[clientVMindex].iops;
+      let condition4 = index != clientVMindex
+      if (condition1 && condition2 && condition3 && condition4) {
   
         let saving1= Math.ceil(100*(dataItems[clientVMindex].unitPrice-item.unitPrice)/dataItems[clientVMindex].unitPrice);
+
         decisions.push({
           name: item.armSkuName,
           price: item.unitPrice,
           vcpu: item.vcpu,
           memory: item.memory,
+          iops: item.iops,
           currencycode: currencycode,
           saving: saving1
         });
@@ -114,6 +131,7 @@ app.post("/mode1", async function(req, res) {
               price: element.unitPrice,
               vcpu: item.vcpu,
               memory: item.memory,
+              iops: item.iops,
               currencycode: currencycode,
               term: element.term,
               saving1: saving1,
@@ -128,10 +146,10 @@ app.post("/mode1", async function(req, res) {
     console.log(error);
   }
 
-  res.send([decisions,savingsPlan]);
+  res.send([currentVM, decisions,savingsPlan]);
 });
 
 app.listen(8080, function() {
-  console.log("Server started on port 3000");
+  console.log("Server started on port 8080");
 });
 
