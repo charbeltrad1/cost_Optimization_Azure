@@ -148,6 +148,9 @@ li {
   background-color: #f2f2f2; /* Add a background color to the list items */
   padding: 10px; /* Add space between the text and the edge of the list item */
 }
+#currentVM td {
+  text-align: center;
+}
 #myTable td {
   text-align: center;
 }
