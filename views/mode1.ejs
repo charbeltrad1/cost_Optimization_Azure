@@ -91,6 +91,24 @@
       <p>Loading...</p>
     </div>
   </form>
+  <br>
+  <h3 class="resultbox">Your current VM:</h3>
+  <table id="currentVM" class="display" style="width:100%">
+    <thead class="resultbox" id="tableHead">
+      <tr>
+          <th>Name</th>
+          <th>Price/hr</th>
+          <th>VCPU</th>
+          <th>Memory (GiB)</th>
+          <th>Combined IOPS</th>
+          <th>Saving %</th>
+      </tr>
+  </thead>
+  <tbody>
+  </tbody>
+  </table>
+  <br>
+  <br>
   <table id="myTable" class="display" style="width:100%">
     <thead class="resultbox" id="tableHead">
       <tr>
@@ -98,12 +116,14 @@
           <th>Price/hr</th>
           <th>VCPU</th>
           <th>Memory (GiB)</th>
+          <th>Combined IOPS</th>
           <th>Saving %</th>
       </tr>
   </thead>
   <tbody>
   </tbody>
   </table>
+  <br>
   <br>
   <h3 class="resultbox">Available savings Plan:</h3>
   <table id="savingsPlanTable" class="display" style="width:100%">
@@ -112,7 +132,8 @@
           <th>Name</th>
           <th>Price/hr</th>
           <th>VCPU</th>
-          <th>Memory (GiB)</th>
+          <th>Memory (MB)</th>
+          <th>Combined IOPS</th>
           <th>Term</th>
           <th>Saving % by Sku refactoring</th>
           <th>Saving plan %</th>
@@ -168,6 +189,30 @@
         }
         loadingContainer.style.display = "none";
             // Loop through the data and populate the table
+
+            var currentVM = $('#currentVM').DataTable({
+                  // Disable search box
+                  searching: false,
+
+                  // Remove "Show X entries" dropdown
+                  lengthChange: false,
+
+                  // Disable pagination
+                  paging: false,
+
+                  // Remove sorting arrows from column headers
+                  ordering: false,
+
+                  // Hide information about the number of entries
+                  info: false,
+
+                  // Customize the layout if needed
+                  // For example, you can remove the default table styling
+                  // by setting "stripeClasses" to an empty array
+                  stripeClasses: []
+            });
+            currentVM.clear().draw();
+            
             var table1 = $('#myTable').DataTable();
             table1.clear().draw();
             
@@ -176,27 +221,42 @@
             table2.clear().draw();
 
             $.each(data[0], function(index, value) {
+              currentVM.row.add([
+                    value.name,
+                    value.price +" "+value.currencycode,
+                    value.vcpu,
+                    value.memory,
+                    value.iops,
+                    value.saving
+                ]).draw(false);
+            });
+
+            $.each(data[1], function(index, value) {
                 table1.row.add([
                     value.name,
                     value.price +" "+value.currencycode,
                     value.vcpu,
                     value.memory,
+                    value.iops,
                     value.saving
                 ]).draw(false);
             });
             console.log(data);
-            $.each(data[1], function(index, value) {
+            $.each(data[2], function(index, value) {
+              console.log(value.term);
                 table2.row.add([
                     value.name,
                     value.price +" "+value.currencycode,
                     value.vcpu,
                     value.memory,
+                    value.iops,
                     value.term,
                     value.saving1,
                     value.saving2,
                     value.saving3
-                ]).draw(false);
+                ]);
             })
+            table2.order([[5, 'asc']]).draw();
     })
       .catch(error => {
         console.error("Error submitting form", error);
